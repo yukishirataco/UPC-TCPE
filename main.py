@@ -26,8 +26,12 @@ print('大学物理实验(2-1) \t1\t')
 print('大学物理实验(2-2) \t2\t')
 print('大学物理实验(小学期) \t3\t')
 course_id = input('编号是:')
-
-valicode = input('请输入与程序同一目录下的 验证码.png 显示的验证码:')
+try:
+    os.system("start 验证码.png")
+except OSError:
+    print('啊哦，显然你的操作系统不能直接打开验证码，请到程序目录下手动打开')
+# Only avaliable in Windows.
+valicode = input('请输入与打开的图片中显示的验证码，若图片未打开，请手动到程序目录下打开 验证码.png:')
 login_session.get(url_login, headers=header)
 post_data = {
     'UserAccount': useraccount,
