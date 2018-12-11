@@ -16,11 +16,17 @@ with open('验证码.png', 'wb') as file:
     file.write(getcookies.content)
 # 保存用户验证码
 print('Remake and Open-Source by Yukino Shiratamaco in UPC Linux 2018')
+print('为了保证使用体验，请最好新建一个文件夹并放入本程序')
 useraccount = input('请输入你的学号(如:1701010101):')
 password = getpass.getpass(prompt='请输入你的密码（你的输入有可能没有显示，这是正常的现象）:')
 usertype = 'Student'
-course_id = input(
-    '请输入你的课程编号，\n大学物理实验(2-1),请输入1\n大学物理实验(2-2),请输入2\n大学物理实验(小学期),请输入3 :')
+print('请输入你的课程编号')
+print('课程类型\t输入内容\t')
+print('大学物理实验(2-1) \t1\t')
+print('大学物理实验(2-2) \t2\t')
+print('大学物理实验(小学期) \t3\t')
+course_id = input('编号是:')
+
 valicode = input('请输入与程序同一目录下的 验证码.png 显示的验证码:')
 login_session.get(url_login, headers=header)
 post_data = {
@@ -44,6 +50,8 @@ else:
         url_get_result, headers=header, cookies=getcookies.cookies.get_dict())
     res_text = result.content.decode()
     res = json.loads(res_text)
+    number = 0
+    sum = 0
     for item in res:
         # 没出来的成绩在json里是None
         itemt = item.get('Title')
@@ -52,6 +60,9 @@ else:
             print('实验项目' + itemt + '的成绩未出')
         else:
             print('实验项目' + itemt + '的成绩为：' + str(score) + '分')
+            sum = sum + score
+            number = number + 1
+    print('已出成绩%d项，平均分为%.2f分' % (number,sum/number) )
 
 os.remove('./验证码.png')
 input('请按回车键退出。')
