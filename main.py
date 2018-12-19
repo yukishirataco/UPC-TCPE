@@ -1,6 +1,7 @@
 #-*- coding:utf-8 -*-
 import time, requests, json, urllib, getpass, os
 from prettytable import PrettyTable
+import ctypes
 
 url_code = 'http://tcpe.upc.edu.cn:8086/Common/GetValiCode/'
 url_login = 'http://tcpe.upc.edu.cn:8086/Account/DoLogin'
@@ -13,13 +14,16 @@ header = {"User-Agent": ua, 'Host': 'tcpe.upc.edu.cn:8086'}
 login_session = requests.session()
 timestamp = int(time.time())
 
+ctypes.windll.kernel32.SetConsoleTitleW("中国石油大学（华东）物理实验成绩查询")
 getcookies = login_session.get(url_code + str(timestamp), headers=header)
 # 从验证码获取页面一次性获得验证码和登陆要用的Cookies
 with open('验证码.png', 'wb') as file:
     file.write(getcookies.content)
 # 保存用户验证码
 print('Remake and Open-Source by Yukino Shiratamaco in UPC Linux 2018')
+print('Github:https://github.com/npfjcg/UPC-TCPE/')
 print('为了保证使用体验，请最好新建一个文件夹并放入本程序')
+print('本程序遵循MIT开源协议\n')
 useraccount = input('请输入你的学号(如:1701010101):')
 password = getpass.getpass(prompt='请输入你的密码（你的输入有可能没有显示，这是正常的现象）:')
 usertype = 'Student'
