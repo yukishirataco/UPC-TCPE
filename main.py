@@ -1,10 +1,13 @@
 #-*- coding:utf-8 -*-
 import time, requests, json, urllib, getpass, os
+from prettytable import PrettyTable
 
 url_code = 'http://tcpe.upc.edu.cn:8086/Common/GetValiCode/'
 url_login = 'http://tcpe.upc.edu.cn:8086/Account/DoLogin'
 url_get_result = 'http://tcpe.upc.edu.cn:8086/Student/GetStuExpeDetail'
-ua = 'Molella/5.0 (YJSNPinux 114.51,KMR OS 19.1)'
+url_get_noexpe = 'http://tcpe.upc.edu.cn:8086/Mark/GetNotExpeMark'
+url_get_final = 'http://tcpe.upc.edu.cn:8086/Mark/GetFinalMarkForStu'
+ua = 'Molella/8.10 (YJSNPinux 114.51,KMR OS 19.1)'
 header = {"User-Agent": ua, 'Host': 'tcpe.upc.edu.cn:8086'}
 
 login_session = requests.session()
@@ -31,7 +34,7 @@ try:
 except OSError:
     print('啊哦，显然你的操作系统不能直接打开验证码，请到程序目录下手动打开')
 # Only avaliable in Windows.
-valicode = input('请输入与打开的图片中显示的验证码，若图片未打开，请手动到程序目录下打开 验证码.png:')
+valicode = input('请输入打开的图片中显示的验证码，若图片未打开，请手动到程序目录下打开 验证码.png:')
 login_session.get(url_login, headers=header)
 post_data = {
     'UserAccount': useraccount,
@@ -50,23 +53,48 @@ if data.text != 'Ok':
     elif data.text == 'AccPwdErr':
         print('用户名或密码错误')
 else:
+    os.system('cls') # only in windows
     result = requests.get(
         url_get_result, headers=header, cookies=getcookies.cookies.get_dict())
     res_text = result.content.decode()
     res = json.loads(res_text)
     number = 0
     sum = 0
+    exp_scores = PrettyTable(["实验项目","项目成绩"])
+    print("你在系统中登记的所有实验项目的成绩如下：")
     for item in res:
         # 没出来的成绩在json里是None
         itemt = item.get('Title')
         score = item.get('ExpeItemScore')
         if score is None:
-            print('实验项目' + itemt + '的成绩未出')
+            exp_scores.add_row([itemt,"未出"])
         else:
-            print('实验项目' + itemt + '的成绩为：' + str(score) + '分')
+            exp_scores.add_row([itemt,str(int(score))])
             sum = sum + score
             number = number + 1
-    print('已出成绩%d项，平均分为%.2f分' % (number,sum/number) )
+    print(exp_scores)
+    print('已出成绩%d项，平均分为%.2f分' % (number, sum / number))
+    result_unexpe = requests.get(
+        url_get_noexpe, headers=header, cookies=getcookies.cookies.get_dict())
+    res_unexpe_json = result_unexpe.content.decode()
+    res_unexpe = json.loads(res_unexpe_json)
+    try:
+        for item in res_unexpe:
+            itemt = item.get('Item')
+            score = item.get('Score')
+            print('非实验项目 ' + itemt + ' 的成绩为：' + str(int(score)) + '分')
+    except Exception as e:
+        pass
+    result_final_raw = requests.get(
+        url_get_final, headers=header, cookies=getcookies.cookies.get_dict())
+    res_final_json = result_final_raw.content.decode()
+    res_final = json.loads(res_final_json)
+    try:
+        for item in res_final:
+            FinalScore = item.get('TotMark')
+            print('总评成绩: ' + str(int(FinalScore)) + ' 分')
+    except Exception as e:
+        pass
 
 os.remove('./验证码.png')
 input('请按回车键退出。')
